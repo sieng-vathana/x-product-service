@@ -8,6 +8,7 @@ import com.x.product.repository.ProductRepository;
 import com.x.product.repository.ProductVariantRepository;
 import com.x.product.repository.SupplierRepository;
 import com.x.product.dto.ProductVariantSaleResponse;
+import com.x.product.dto.MarketplaceProductResponse;
 import com.x.redis.cache.CacheNames;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -46,6 +47,36 @@ public class ProductService {
         validateStoreId(storeId);
         return productRepository.findAllByStoreId(storeId,
                 PageRequest.of(page, size, Sort.by("createdAt").descending()));
+    }
+
+    @Cacheable(cacheNames = CacheNames.PRODUCTS,
+            key = "'marketplace:' + (#search == null ? '' : #search.trim().toLowerCase()) + ':' + #page + ':' + #size")
+    @Transactional(readOnly = true)
+    public Page<MarketplaceProductResponse> getMarketplaceProducts(String search, int page, int size) {
+        String normalizedSearch = search == null ? null : search.trim();
+        Page<Product> products = productRepository.findMarketplaceProducts(
+                normalizedSearch,
+                List.of(ProductSaleChannel.ONLINE, ProductSaleChannel.BOTH),
+                PageRequest.of(page, size));
+        return products.map(this::toMarketplaceProduct);
+    }
+
+    private MarketplaceProductResponse toMarketplaceProduct(Product product) {
+        ProductVariant variant = product.getVariants() == null ? null : product.getVariants().stream()
+                .filter(candidate -> candidate.getStatus() == null || candidate.getStatus() == 1)
+                .filter(candidate -> candidate.getOnlinePrice() != null)
+                .sorted((left, right) -> Boolean.TRUE.equals(right.getIsDefault())
+                        ? 1 : Boolean.TRUE.equals(left.getIsDefault()) ? -1 : 0)
+                .findFirst()
+                .orElse(null);
+        return new MarketplaceProductResponse(
+                product.getId(), product.getStoreId(), product.getProductName(), product.getShortName(),
+                product.getThumbnail(), product.getDescription(),
+                product.getCategory() == null ? null : product.getCategory().getId(),
+                product.getCategory() == null ? null : product.getCategory().getCategoryName(),
+                product.getCurrencyCode(), variant == null ? null : variant.getOnlinePrice(),
+                variant == null ? null : variant.getCompareAtPrice(),
+                variant == null ? null : variant.getQuantity(), product.getIsFeatured());
     }
 
     /**

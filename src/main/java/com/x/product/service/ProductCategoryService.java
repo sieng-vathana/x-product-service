@@ -3,6 +3,7 @@ package com.x.product.service;
 import com.x.product.dto.CatalogStatus;
 import com.x.product.dto.ProductCategoryRequest;
 import com.x.product.dto.ProductCategoryResponse;
+import com.x.product.dto.MarketplaceCategoryResponse;
 import com.x.product.entity.ProductCategory;
 import com.x.product.repository.ProductCategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,13 @@ public class ProductCategoryService {
     private static final String DELETED = "DELETED";
 
     private final ProductCategoryRepository categoryRepository;
+
+    @Transactional(readOnly = true)
+    public Page<MarketplaceCategoryResponse> listForMarketplace(int page, int size) {
+        return categoryRepository.findMarketplaceCategories(PageRequest.of(page, size))
+                .map(category -> new MarketplaceCategoryResponse(
+                        category.getId(), category.getCategoryName(), category.getImage(), category.getIsFeatured()));
+    }
 
     @Transactional(readOnly = true)
     public Page<ProductCategoryResponse> list(

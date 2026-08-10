@@ -12,6 +12,13 @@ import java.util.Optional;
 
 @Repository
 public interface ProductCategoryRepository extends JpaRepository<ProductCategory, Long> {
+    @Query("""
+            SELECT c FROM ProductCategory c
+            WHERE c.status <> 'DELETED'
+            ORDER BY c.isFeatured DESC, c.sortOrder ASC, c.categoryName ASC
+            """)
+    Page<ProductCategory> findMarketplaceCategories(Pageable pageable);
+
     Page<ProductCategory> findByBusinessIdAndStatusNot(
             Long businessId, String status, Pageable pageable);
 
