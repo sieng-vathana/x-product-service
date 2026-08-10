@@ -23,9 +23,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             JOIN p.variants v
             WHERE (p.status IS NULL OR p.status = 1)
               AND (p.isSellable IS NULL OR p.isSellable = true)
-              AND p.salesChannel IN :onlineChannels
               AND (v.status IS NULL OR v.status = 1)
-              AND v.onlinePrice IS NOT NULL
+              AND (v.onlinePrice IS NOT NULL OR v.posPrice IS NOT NULL)
               AND (
                     :search IS NULL OR :search = ''
                     OR LOWER(p.productName) LIKE LOWER(CONCAT('%', :search, '%'))
@@ -38,6 +37,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             """)
     Page<Product> findMarketplaceProducts(
             @Param("search") String search,
-            @Param("onlineChannels") List<com.x.product.entity.ProductSaleChannel> onlineChannels,
             Pageable pageable);
 }

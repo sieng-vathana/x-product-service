@@ -56,7 +56,6 @@ public class ProductService {
         String normalizedSearch = search == null ? null : search.trim();
         Page<Product> products = productRepository.findMarketplaceProducts(
                 normalizedSearch,
-                List.of(ProductSaleChannel.ONLINE, ProductSaleChannel.BOTH),
                 PageRequest.of(page, size));
         return products.map(this::toMarketplaceProduct);
     }
@@ -64,7 +63,7 @@ public class ProductService {
     private MarketplaceProductResponse toMarketplaceProduct(Product product) {
         ProductVariant variant = product.getVariants() == null ? null : product.getVariants().stream()
                 .filter(candidate -> candidate.getStatus() == null || candidate.getStatus() == 1)
-                .filter(candidate -> candidate.getOnlinePrice() != null)
+                .filter(candidate -> candidate.getOnlinePrice() != null || candidate.getPosPrice() != null)
                 .sorted((left, right) -> Boolean.TRUE.equals(right.getIsDefault())
                         ? 1 : Boolean.TRUE.equals(left.getIsDefault()) ? -1 : 0)
                 .findFirst()
@@ -74,7 +73,8 @@ public class ProductService {
                 product.getThumbnail(), product.getDescription(),
                 product.getCategory() == null ? null : product.getCategory().getId(),
                 product.getCategory() == null ? null : product.getCategory().getCategoryName(),
-                product.getCurrencyCode(), variant == null ? null : variant.getOnlinePrice(),
+                product.getCurrencyCode(), variant == null ? null
+                        : variant.getOnlinePrice() != null ? variant.getOnlinePrice() : variant.getPosPrice(),
                 variant == null ? null : variant.getCompareAtPrice(),
                 variant == null ? null : variant.getQuantity(), product.getIsFeatured());
     }
