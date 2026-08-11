@@ -103,7 +103,7 @@ public class ProductService {
                 product.getId(), variant.getId(), product.getStoreId(), product.getProductName(),
                 variant.getVariantName(), variant.getSku(), variant.getBarcode(), product.getCurrencyCode(),
                 product.getSalesChannel(), variant.getCostPrice(), variant.getPosPrice(),
-                variant.getOnlinePrice(), variant.getStatus());
+                variant.getOnlinePrice(), variant.getStatus(), variant.getQuantity());
     }
 
     @Caching(evict = {

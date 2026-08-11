@@ -17,5 +17,6 @@ public record ProductVariantSaleResponse(
         BigDecimal costPrice,
         BigDecimal posPrice,
         BigDecimal onlinePrice,
-        Integer status) {
+        Integer status,
+        Integer quantity) {
 }
