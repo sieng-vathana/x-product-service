@@ -114,10 +114,14 @@ public class ProductCategoryService {
         category.setIsGlobal(isGlobal);
         category.setStatus(status(request.status()));
 
+        if (category.getStoreIds() == null) {
+            category.setStoreIds(new LinkedHashSet<>());
+        }
+        category.getStoreIds().clear();
         if (!isGlobal) {
-            category.setStoreIds(copyStoreIds(request.storeIds()));
-        } else {
-            category.setStoreIds(request.storeIds() != null ? new LinkedHashSet<>(request.storeIds()) : new LinkedHashSet<>());
+            category.getStoreIds().addAll(copyStoreIds(request.storeIds()));
+        } else if (request.storeIds() != null) {
+            category.getStoreIds().addAll(request.storeIds());
         }
     }
 

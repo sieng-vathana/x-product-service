@@ -94,10 +94,14 @@ public class ProductBrandService {
         brand.setIsGlobal(isGlobal);
         brand.setStatus(status(request.status()));
 
+        if (brand.getStoreIds() == null) {
+            brand.setStoreIds(new LinkedHashSet<>());
+        }
+        brand.getStoreIds().clear();
         if (!isGlobal) {
-            brand.setStoreIds(copyStoreIds(request.storeIds()));
-        } else {
-            brand.setStoreIds(request.storeIds() != null ? new LinkedHashSet<>(request.storeIds()) : new LinkedHashSet<>());
+            brand.getStoreIds().addAll(copyStoreIds(request.storeIds()));
+        } else if (request.storeIds() != null) {
+            brand.getStoreIds().addAll(request.storeIds());
         }
     }
 

@@ -98,10 +98,14 @@ public class ProductUnitService {
         unit.setIsGlobal(isGlobal);
         unit.setStatus(status(request.status()));
 
+        if (unit.getStoreIds() == null) {
+            unit.setStoreIds(new LinkedHashSet<>());
+        }
+        unit.getStoreIds().clear();
         if (!isGlobal) {
-            unit.setStoreIds(copyStoreIds(request.storeIds()));
-        } else {
-            unit.setStoreIds(request.storeIds() != null ? new LinkedHashSet<>(request.storeIds()) : new LinkedHashSet<>());
+            unit.getStoreIds().addAll(copyStoreIds(request.storeIds()));
+        } else if (request.storeIds() != null) {
+            unit.getStoreIds().addAll(request.storeIds());
         }
     }
 
