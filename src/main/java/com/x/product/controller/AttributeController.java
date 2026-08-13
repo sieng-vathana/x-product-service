@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/products/attributes")
 @RequiredArgsConstructor
@@ -16,7 +18,7 @@ public class AttributeController {
     private final AttributeService attributeService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAttributes(
+    public ResponseEntity<ApiResponse<List<ProductAttribute>>> getAttributes(
             @RequestParam @jakarta.validation.constraints.Positive Long businessId) {
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(),
                 attributeService.getAttributesByBusiness(businessId)));
@@ -31,18 +33,26 @@ public class AttributeController {
     @PostMapping
     public ResponseEntity<ApiResponse<ProductAttribute>> createAttribute(@RequestBody ProductAttribute attribute) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(HttpStatus.CREATED.value(), "Attribute created",
+                .body(ApiResponse.success(HttpStatus.CREATED.value(), "Product option created",
                         attributeService.createAttribute(attribute)));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<ProductAttribute>> updateAttribute(
+            @PathVariable Long id,
+            @RequestBody ProductAttribute attributeDetails) {
+        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Product option updated",
+                attributeService.updateAttribute(id, attributeDetails)));
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteAttribute(@PathVariable Long id) {
-        attributeService.deleteAttribute(id);
-        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Attribute deleted", null));
+    public ResponseEntity<ApiResponse<ProductAttribute>> softDeleteAttribute(@PathVariable Long id) {
+        ProductAttribute deleted = attributeService.softDeleteAttribute(id);
+        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Product option deleted", deleted));
     }
 
     @GetMapping("/{attributeId}/values")
-    public ResponseEntity<ApiResponse<?>> getAttributeValues(@PathVariable Long attributeId) {
+    public ResponseEntity<ApiResponse<List<ProductAttributeValue>>> getAttributeValues(@PathVariable Long attributeId) {
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(),
                 attributeService.getAttributeValues(attributeId)));
     }
@@ -52,7 +62,13 @@ public class AttributeController {
             @PathVariable Long attributeId,
             @RequestBody ProductAttributeValue value) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(HttpStatus.CREATED.value(), "Attribute value added",
+                .body(ApiResponse.success(HttpStatus.CREATED.value(), "Option value added",
                         attributeService.addAttributeValue(attributeId, value)));
+    }
+
+    @DeleteMapping("/values/{valueId}")
+    public ResponseEntity<ApiResponse<Void>> deleteAttributeValue(@PathVariable Long valueId) {
+        attributeService.deleteAttributeValue(valueId);
+        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Option value deleted", null));
     }
 }

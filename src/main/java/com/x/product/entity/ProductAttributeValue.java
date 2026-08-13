@@ -1,5 +1,6 @@
 package com.x.product.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,8 +18,9 @@ public class ProductAttributeValue {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "attribute_id")
+    @JsonIgnore
     private ProductAttribute attribute;
 
     private String value;

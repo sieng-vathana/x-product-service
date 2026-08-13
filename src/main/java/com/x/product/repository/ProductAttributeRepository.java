@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface ProductAttributeRepository extends JpaRepository<ProductAttribute, Long> {
     List<ProductAttribute> findAllByBusinessId(Long businessId);
+    List<ProductAttribute> findAllByBusinessIdAndStatusNot(Long businessId, Integer status);
 }
