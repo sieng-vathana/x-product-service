@@ -238,6 +238,15 @@ public class ProductService {
         if (productDetails.getSalesChannel() != null) {
             product.setSalesChannel(productDetails.getSalesChannel());
         }
+        product.setIsGlobal(productDetails.getIsGlobal());
+        if (product.getStoreIds() == null) {
+            product.setStoreIds(new ArrayList<>());
+        } else {
+            product.getStoreIds().clear();
+        }
+        if (productDetails.getStoreIds() != null) {
+            product.getStoreIds().addAll(productDetails.getStoreIds());
+        }
         product.setShortName(productDetails.getShortName());
         product.setQrCode(productDetails.getQrCode());
         product.setCategory(productDetails.getCategory());

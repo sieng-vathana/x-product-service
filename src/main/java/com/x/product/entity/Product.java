@@ -32,6 +32,15 @@ public class Product {
     @Column(name = "store_id", nullable = false)
     private Long storeId;
 
+    @Column(name = "is_global")
+    @Builder.Default
+    private Boolean isGlobal = false;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "product_store_mappings", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "store_id")
+    private List<Long> storeIds;
+
     @Column(name = "product_code")
     private String productCode;
 
