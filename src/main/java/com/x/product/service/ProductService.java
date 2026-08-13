@@ -45,7 +45,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Page<Product> getAllProducts(Long storeId, int page, int size) {
         validateStoreId(storeId);
-        return productRepository.findAllByStoreId(storeId,
+        return productRepository.findAvailableProducts(storeId,
                 PageRequest.of(page, size, Sort.by("createdAt").descending()));
     }
 

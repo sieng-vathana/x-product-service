@@ -18,6 +18,14 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findAllByStoreId(Long storeId, Pageable pageable);
 
     @Query("""
+        SELECT DISTINCT p FROM Product p
+        LEFT JOIN p.storeIds s
+        WHERE (p.status IS NULL OR p.status != 0)
+          AND (p.storeId = :storeId OR p.isGlobal = true OR s = :storeId)
+    """)
+    Page<Product> findAvailableProducts(@Param("storeId") Long storeId, Pageable pageable);
+
+    @Query("""
             SELECT DISTINCT p FROM Product p
             LEFT JOIN p.category c
             JOIN p.variants v
