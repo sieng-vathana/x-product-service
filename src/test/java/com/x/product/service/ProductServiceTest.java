@@ -6,12 +6,14 @@ import com.x.product.entity.ProductVariant;
 import com.x.product.repository.ProductRepository;
 import com.x.product.repository.ProductVariantRepository;
 import com.x.product.repository.SupplierRepository;
+import com.x.product.dto.ProductVariantSaleResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -104,6 +106,62 @@ class ProductServiceTest {
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
                 () -> new ProductService(repository, mock(ProductVariantRepository.class), mock(SupplierRepository.class)).createProduct(product));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
+
+    @Test
+    void sellableVariantUsesRequestedMappedStore() {
+        ProductRepository repository = mock(ProductRepository.class);
+        ProductVariantRepository variantRepository = mock(ProductVariantRepository.class);
+        Product product = Product.builder()
+                .id(2L)
+                .storeId(2L)
+                .isGlobal(false)
+                .storeIds(List.of(2L, 4L))
+                .productName("French Macaron")
+                .currencyCode("USD")
+                .salesChannel(ProductSaleChannel.BOTH)
+                .build();
+        ProductVariant variant = ProductVariant.builder()
+                .id(4L)
+                .product(product)
+                .sku("MAC-RED")
+                .barcode("1234567890123")
+                .posPrice(new BigDecimal("1.80"))
+                .onlinePrice(new BigDecimal("2.15"))
+                .build();
+        when(variantRepository.findById(4L)).thenReturn(Optional.of(variant));
+
+        ProductVariantSaleResponse response = new ProductService(
+                repository, variantRepository, mock(SupplierRepository.class))
+                .getSellableVariant(4L, 4L);
+
+        assertEquals(4L, response.storeId());
+    }
+
+    @Test
+    void sellableVariantRejectsStoreWithoutProductCoverage() {
+        ProductRepository repository = mock(ProductRepository.class);
+        ProductVariantRepository variantRepository = mock(ProductVariantRepository.class);
+        Product product = Product.builder()
+                .id(2L)
+                .storeId(2L)
+                .isGlobal(false)
+                .storeIds(List.of(2L, 4L))
+                .build();
+        ProductVariant variant = ProductVariant.builder()
+                .id(4L)
+                .product(product)
+                .sku("MAC-RED")
+                .barcode("1234567890123")
+                .build();
+        when(variantRepository.findById(4L)).thenReturn(Optional.of(variant));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> new ProductService(repository, variantRepository, mock(SupplierRepository.class))
+                        .getSellableVariant(4L, 3L));
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
     }

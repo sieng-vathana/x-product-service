@@ -39,9 +39,11 @@ public class ProductController {
     }
 
     @GetMapping("/variants/{id}")
-    public ResponseEntity<ApiResponse<ProductVariantSaleResponse>> getSellableVariant(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<ProductVariantSaleResponse>> getSellableVariant(
+            @PathVariable Long id,
+            @RequestParam(required = false) @jakarta.validation.constraints.Positive Long storeId) {
         return ResponseEntity.ok(ApiResponse.success(
-                HttpStatus.OK.value(), productService.getSellableVariant(id)));
+                HttpStatus.OK.value(), productService.getSellableVariant(id, storeId)));
     }
 
     @PostMapping

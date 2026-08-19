@@ -91,6 +91,11 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductVariantSaleResponse getSellableVariant(Long id) {
+        return getSellableVariant(id, null);
+    }
+
+    @Transactional(readOnly = true)
+    public ProductVariantSaleResponse getSellableVariant(Long id, Long requestedStoreId) {
         ProductVariant variant = productVariantRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product variant not found"));
         Product product = variant.getProduct();
@@ -99,11 +104,22 @@ public class ProductService {
                 || (variant.getStatus() != null && variant.getStatus() != 1)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Product variant is not sellable");
         }
+        if (requestedStoreId != null && !isAvailableInStore(product, requestedStoreId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Product variant belongs to another store");
+        }
+        Long sellingStoreId = requestedStoreId == null ? product.getStoreId() : requestedStoreId;
         return new ProductVariantSaleResponse(
-                product.getId(), variant.getId(), product.getStoreId(), product.getProductName(),
+                product.getId(), variant.getId(), sellingStoreId, product.getProductName(),
                 variant.getVariantName(), variant.getSku(), variant.getBarcode(), product.getCurrencyCode(),
                 product.getSalesChannel(), variant.getCostPrice(), variant.getPosPrice(),
                 variant.getOnlinePrice(), variant.getStatus(), variant.getQuantity());
+    }
+
+    private boolean isAvailableInStore(Product product, Long storeId) {
+        return Objects.equals(product.getStoreId(), storeId)
+                || Boolean.TRUE.equals(product.getIsGlobal())
+                || (product.getStoreIds() != null && product.getStoreIds().contains(storeId));
     }
 
     @Caching(evict = {
