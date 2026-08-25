@@ -4,12 +4,14 @@ import com.x.product.entity.ProductAttribute;
 import com.x.product.entity.ProductAttributeValue;
 import com.x.product.repository.ProductAttributeRepository;
 import com.x.product.repository.ProductAttributeValueRepository;
+import com.x.product.repository.ProductVariantAttributeValueRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 
 @Service
@@ -17,16 +19,21 @@ import java.util.List;
 public class AttributeService {
     private final ProductAttributeRepository attributeRepository;
     private final ProductAttributeValueRepository attributeValueRepository;
+    private final ProductVariantAttributeValueRepository variantAttributeValueRepository;
 
     @Transactional(readOnly = true)
     public List<ProductAttribute> getAttributesByBusiness(Long businessId) {
-        return attributeRepository.findAllByBusinessIdAndStatusNot(businessId, 0);
+        List<ProductAttribute> attributes = attributeRepository.findAllByBusinessIdAndStatusNot(businessId, 0);
+        attributes.forEach(this::populateUsageCount);
+        return attributes;
     }
 
     @Transactional(readOnly = true)
     public ProductAttribute getAttributeById(Long id) {
-        return attributeRepository.findById(id)
+        ProductAttribute attribute = attributeRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Attribute not found with id: " + id));
+        populateUsageCount(attribute);
+        return attribute;
     }
 
     @Transactional
@@ -40,6 +47,12 @@ public class AttributeService {
 
         if (attribute.getStatus() == null) {
             attribute.setStatus(1);
+        }
+        if (attribute.getIsGlobal() == null) {
+            attribute.setIsGlobal(true);
+        }
+        if (attribute.getStoreIds() == null) {
+            attribute.setStoreIds(new LinkedHashSet<>());
         }
 
         if (attribute.getValues() != null) {
@@ -59,6 +72,19 @@ public class AttributeService {
 
         if (attributeDetails.getStatus() != null) {
             existing.setStatus(attributeDetails.getStatus());
+        }
+
+        if (attributeDetails.getDescription() != null) {
+            existing.setDescription(attributeDetails.getDescription());
+        }
+
+        if (attributeDetails.getIsGlobal() != null) {
+            existing.setIsGlobal(attributeDetails.getIsGlobal());
+        }
+
+        if (attributeDetails.getStoreIds() != null) {
+            existing.getStoreIds().clear();
+            existing.getStoreIds().addAll(attributeDetails.getStoreIds());
         }
 
         if (attributeDetails.getValues() != null) {
@@ -99,5 +125,10 @@ public class AttributeService {
         ProductAttributeValue val = attributeValueRepository.findById(valueId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Attribute value not found with id: " + valueId));
         attributeValueRepository.delete(val);
+    }
+
+    private void populateUsageCount(ProductAttribute attribute) {
+        attribute.setUsedOnProducts(Math.toIntExact(
+                variantAttributeValueRepository.countDistinctProductsByAttributeId(attribute.getId())));
     }
 }
