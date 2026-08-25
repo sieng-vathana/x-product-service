@@ -24,3 +24,7 @@ jwt:
 x:
   redis:
     enabled: ${X_REDIS_ENABLED:true}
+    caches:
+      product-attributes: 5m
+      product-attribute-by-id: 5m
+      product-attribute-values: 5m
