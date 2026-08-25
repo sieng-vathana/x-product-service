@@ -30,6 +30,9 @@ x:
     caches:
       product-by-id: 15m
       products: 5m
+      product-attributes: 5m
+      product-attribute-by-id: 5m
+      product-attribute-values: 5m
 
 jwt:
   secret: ${JWT_SECRET:x-local-jwt-secret-change-me-32chars}

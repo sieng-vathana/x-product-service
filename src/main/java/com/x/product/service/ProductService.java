@@ -123,7 +123,9 @@ public class ProductService {
     }
 
     @Caching(evict = {
-            @CacheEvict(cacheNames = CacheNames.PRODUCTS, allEntries = true)
+            @CacheEvict(cacheNames = CacheNames.PRODUCTS, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.PRODUCT_ATTRIBUTES, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.PRODUCT_ATTRIBUTE_BY_ID, allEntries = true)
     })
     @Transactional
     public Product createProduct(Product product) {
@@ -240,7 +242,9 @@ public class ProductService {
 
     @Caching(evict = {
             @CacheEvict(cacheNames = CacheNames.PRODUCT_BY_ID, key = "#id"),
-            @CacheEvict(cacheNames = CacheNames.PRODUCTS, allEntries = true)
+            @CacheEvict(cacheNames = CacheNames.PRODUCTS, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.PRODUCT_ATTRIBUTES, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.PRODUCT_ATTRIBUTE_BY_ID, allEntries = true)
     })
     @Transactional
     public Product updateProduct(Long id, Product productDetails) {
@@ -292,7 +296,9 @@ public class ProductService {
 
     @Caching(evict = {
             @CacheEvict(cacheNames = CacheNames.PRODUCT_BY_ID, key = "#id"),
-            @CacheEvict(cacheNames = CacheNames.PRODUCTS, allEntries = true)
+            @CacheEvict(cacheNames = CacheNames.PRODUCTS, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.PRODUCT_ATTRIBUTES, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.PRODUCT_ATTRIBUTE_BY_ID, allEntries = true)
     })
     @Transactional
     public void deleteProduct(Long id) {
