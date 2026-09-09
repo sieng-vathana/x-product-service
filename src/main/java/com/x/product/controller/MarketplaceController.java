@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,6 +42,17 @@ public class MarketplaceController {
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "24") @Min(1) @Max(100) int size) {
         var categories = productCategoryService.listForMarketplace(page, size);
+        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), new PageResponse<>(
+                categories.getContent(), categories.getNumber(), categories.getSize(), categories.getTotalElements(),
+                categories.getTotalPages(), categories.hasNext())));
+    }
+
+    @GetMapping("/stores/{storeId}/categories")
+    public ResponseEntity<ApiResponse<PageResponse<MarketplaceCategoryResponse>>> getStoreCategories(
+            @PathVariable @jakarta.validation.constraints.Positive Long storeId,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "50") @Min(1) @Max(100) int size) {
+        var categories = productCategoryService.listForStoreMenu(storeId, page, size);
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), new PageResponse<>(
                 categories.getContent(), categories.getNumber(), categories.getSize(), categories.getTotalElements(),
                 categories.getTotalPages(), categories.hasNext())));

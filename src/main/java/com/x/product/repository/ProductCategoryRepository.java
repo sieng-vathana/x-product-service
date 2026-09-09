@@ -19,6 +19,17 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
             """)
     Page<ProductCategory> findMarketplaceCategories(Pageable pageable);
 
+    @Query("""
+        SELECT DISTINCT c FROM ProductCategory c
+        LEFT JOIN c.storeIds s
+        WHERE c.status <> 'DELETED'
+          AND (c.isGlobal = true OR s = :storeId)
+        ORDER BY c.sortOrder ASC, c.categoryName ASC
+    """)
+    Page<ProductCategory> findStoreMenuCategories(
+            @Param("storeId") Long storeId,
+            Pageable pageable);
+
     Page<ProductCategory> findByBusinessIdAndStatusNot(
             Long businessId, String status, Pageable pageable);
 
