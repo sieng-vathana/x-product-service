@@ -28,4 +28,6 @@ public interface SupplierRepository extends JpaRepository<Supplier, Long> {
             Pageable pageable);
 
     Optional<Supplier> findByIdAndBusinessIdAndStatusNot(Long id, Long businessId, String status);
+
+    boolean existsByBusinessIdAndSupplierCode(Long businessId, String supplierCode);
 }

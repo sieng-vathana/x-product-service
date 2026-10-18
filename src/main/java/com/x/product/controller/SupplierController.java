@@ -1,5 +1,6 @@
 package com.x.product.controller;
 
+import com.x.product.dto.SupplierRequest;
 import com.x.product.entity.Supplier;
 import com.x.product.service.SupplierService;
 import com.sharedlib.response.ApiResponse;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/products/suppliers")
@@ -42,6 +44,15 @@ public class SupplierController {
             @RequestParam Long businessId) {
         return ResponseEntity.ok(ApiResponse.success(
                 HttpStatus.OK.value(), supplierService.get(id, businessId)));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<Supplier>> update(
+            @PathVariable Long id,
+            @RequestParam Long businessId,
+            @Valid @RequestBody SupplierRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(
+                HttpStatus.OK.value(), "Supplier updated", supplierService.update(id, businessId, request)));
     }
 
     @PostMapping

@@ -41,6 +41,10 @@ public class Supplier {
     @Column(name = "supplier_name", nullable = false, length = 160)
     private String supplierName;
 
+    /** The person to call at the supplier. */
+    @Column(name = "contact_name", length = 160)
+    private String contactName;
+
     @Column(length = 32)
     private String phone;
 
@@ -49,6 +53,10 @@ public class Supplier {
 
     @Column(columnDefinition = "TEXT")
     private String address;
+
+    /** For example "Net 30" or "Cash on delivery". */
+    @Column(name = "payment_terms", length = 64)
+    private String paymentTerms;
 
     private String status;
 

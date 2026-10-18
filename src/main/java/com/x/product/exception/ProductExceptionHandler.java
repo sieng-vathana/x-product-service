@@ -3,6 +3,7 @@ package com.x.product.exception;
 import com.sharedlib.response.ApiResponse;
 import com.x.product.controller.ProductCategoryController;
 import com.x.product.controller.ProductUnitController;
+import com.x.product.controller.SupplierController;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -20,7 +21,8 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice(assignableTypes = {
         ProductUnitController.class,
-        ProductCategoryController.class
+        ProductCategoryController.class,
+        SupplierController.class
 })
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ProductExceptionHandler {
