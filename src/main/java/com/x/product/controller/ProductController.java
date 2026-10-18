@@ -3,6 +3,7 @@ package com.x.product.controller;
 import com.x.product.entity.Product;
 import com.x.product.service.ProductService;
 import com.x.product.dto.ProductVariantSaleResponse;
+import com.x.product.dto.ProductVariantInventoryResponse;
 import com.sharedlib.response.ApiResponse;
 import com.sharedlib.response.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,14 @@ public class ProductController {
             @RequestParam(required = false) @jakarta.validation.constraints.Positive Long storeId) {
         return ResponseEntity.ok(ApiResponse.success(
                 HttpStatus.OK.value(), productService.getSellableVariant(id, storeId)));
+    }
+
+    @GetMapping("/variants/{id}/inventory")
+    public ResponseEntity<ApiResponse<ProductVariantInventoryResponse>> getInventoryVariant(
+            @PathVariable Long id,
+            @RequestParam(required = false) @jakarta.validation.constraints.Positive Long storeId) {
+        return ResponseEntity.ok(ApiResponse.success(
+                HttpStatus.OK.value(), productService.getInventoryVariant(id, storeId)));
     }
 
     @PostMapping

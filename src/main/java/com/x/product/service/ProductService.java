@@ -8,6 +8,7 @@ import com.x.product.repository.ProductRepository;
 import com.x.product.repository.ProductVariantRepository;
 import com.x.product.repository.SupplierRepository;
 import com.x.product.dto.ProductVariantSaleResponse;
+import com.x.product.dto.ProductVariantInventoryResponse;
 import com.x.product.dto.MarketplaceProductResponse;
 import com.x.redis.cache.CacheNames;
 import lombok.RequiredArgsConstructor;
@@ -114,6 +115,24 @@ public class ProductService {
                 variant.getVariantName(), variant.getSku(), variant.getBarcode(), product.getCurrencyCode(),
                 product.getSalesChannel(), variant.getCostPrice(), variant.getPosPrice(),
                 variant.getOnlinePrice(), variant.getStatus(), variant.getQuantity());
+    }
+
+    /** Inventory lookup allows stockable products that are temporarily not sellable. */
+    @Transactional(readOnly = true)
+    public ProductVariantInventoryResponse getInventoryVariant(Long id, Long requestedStoreId) {
+        ProductVariant variant = productVariantRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product variant not found"));
+        Product product = variant.getProduct();
+        if (!Boolean.TRUE.equals(product.getIsStockable())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product variant is not stockable");
+        }
+        if (requestedStoreId != null && !isAvailableInStore(product, requestedStoreId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Product variant does not belong to this store");
+        }
+        Long inventoryStoreId = requestedStoreId == null ? product.getStoreId() : requestedStoreId;
+        return new ProductVariantInventoryResponse(variant.getId(), inventoryStoreId, product.getProductName(),
+                variant.getDisplayName(), variant.getSku(), variant.getQuantity());
     }
 
     private boolean isAvailableInStore(Product product, Long storeId) {
