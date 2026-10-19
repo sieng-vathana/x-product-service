@@ -17,7 +17,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -28,23 +27,20 @@ public class ProductCategoryService {
 
     private final ProductCategoryRepository categoryRepository;
 
-    private static final List<MarketplaceCategoryResponse> PLATFORM_CATEGORIES = List.of(
-            new MarketplaceCategoryResponse(1L, "Café & Drinks", "CAFE_AND_BEVERAGE", "/categories/cafe.svg", true),
-            new MarketplaceCategoryResponse(2L, "Food & Dining", "RESTAURANT", "/categories/food.svg", true),
-            new MarketplaceCategoryResponse(3L, "Bakery & Desserts", "BAKERY", "/categories/bakery.svg", true),
-            new MarketplaceCategoryResponse(4L, "Groceries & Minimart", "GROCERY", "/categories/grocery.svg", true),
-            new MarketplaceCategoryResponse(5L, "Fashion & Accessories", "FASHION", "/categories/fashion.svg", true),
-            new MarketplaceCategoryResponse(6L, "Health & Pharmacy", "HEALTH_BEAUTY", "/categories/pharmacy.svg", false),
-            new MarketplaceCategoryResponse(7L, "Electronics & Tech", "ELECTRONICS", "/categories/electronics.svg", false),
-            new MarketplaceCategoryResponse(8L, "General Retail", "GENERAL_RETAIL", "/categories/retail.svg", false)
-    );
+    private static final Long PLATFORM_BUSINESS_ID = 1L;
 
+    @Transactional(readOnly = true)
     public Page<MarketplaceCategoryResponse> listForMarketplace(int page, int size) {
-        int start = Math.min(page * size, PLATFORM_CATEGORIES.size());
-        int end = Math.min(start + size, PLATFORM_CATEGORIES.size());
-        List<MarketplaceCategoryResponse> paged = PLATFORM_CATEGORIES.subList(start, end);
-        return new org.springframework.data.domain.PageImpl<>(
-                paged, PageRequest.of(page, size), PLATFORM_CATEGORIES.size());
+        return categoryRepository.findMarketplaceCategories(
+                        PLATFORM_BUSINESS_ID,
+                        CatalogStatus.ACTIVE.name(),
+                        PageRequest.of(page, size))
+                .map(category -> new MarketplaceCategoryResponse(
+                        category.getId(),
+                        category.getCategoryName(),
+                        category.getCategoryCode(),
+                        category.getImage(),
+                        category.getIsFeatured()));
     }
 
     @Transactional(readOnly = true)

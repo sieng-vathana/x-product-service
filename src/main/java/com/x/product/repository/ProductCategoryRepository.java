@@ -14,10 +14,17 @@ import java.util.Optional;
 public interface ProductCategoryRepository extends JpaRepository<ProductCategory, Long> {
     @Query("""
             SELECT c FROM ProductCategory c
-            WHERE c.status <> 'DELETED'
+            WHERE c.businessId = :businessId
+              AND c.status = :status
+              AND c.isGlobal = true
             ORDER BY c.isFeatured DESC, c.sortOrder ASC, c.categoryName ASC
             """)
-    Page<ProductCategory> findMarketplaceCategories(Pageable pageable);
+    Page<ProductCategory> findMarketplaceCategories(
+            @Param("businessId") Long businessId,
+            @Param("status") String status,
+            Pageable pageable);
+
+    long countByBusinessId(Long businessId);
 
     @Query("""
         SELECT DISTINCT c FROM ProductCategory c
