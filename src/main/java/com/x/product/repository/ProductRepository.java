@@ -17,6 +17,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Page<Product> findAllByStoreId(Long storeId, Pageable pageable);
 
+    /** Products owned by these stores, for a merchant's plan limit. */
+    long countByStoreIdIn(java.util.Collection<Long> storeIds);
+
     @Query("""
         SELECT DISTINCT p FROM Product p
         LEFT JOIN p.storeIds s

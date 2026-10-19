@@ -42,6 +42,11 @@ public class ProductService {
     /**
      * List cache — short TTL. Evicted on any product write.
      */
+    @Transactional(readOnly = true)
+    public long countProducts(java.util.List<Long> storeIds) {
+        return storeIds == null || storeIds.isEmpty() ? 0 : productRepository.countByStoreIdIn(storeIds);
+    }
+
     @Cacheable(cacheNames = CacheNames.PRODUCTS, key = "#storeId + ':' + #page + ':' + #size")
     @Transactional(readOnly = true)
     public Page<Product> getAllProducts(Long storeId, int page, int size) {

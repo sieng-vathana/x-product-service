@@ -34,6 +34,12 @@ public class ProductController {
                 products.getTotalPages(), products.hasNext())));
     }
 
+    /** How many products the given stores own; the BFF checks it against the merchant's plan limit. */
+    @GetMapping("/count")
+    public ResponseEntity<ApiResponse<Long>> countProducts(@RequestParam java.util.List<Long> storeIds) {
+        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), productService.countProducts(storeIds)));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Product>> getProductById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), productService.getProductById(id)));
